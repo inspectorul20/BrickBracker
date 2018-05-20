@@ -23,6 +23,8 @@ import java.awt.event.WindowEvent;
  * Instances of the Ball and Rectangle classes can be added to an instance of this class to
  * draw and animate simple shapes on the screen. 
  *
+ * <b>Note:</b> Patched to prevent mulitple render objects with the same key, thus losing the render object reference
+ *
  * @see Ball
  * @see Rectangle
  *
@@ -45,7 +47,6 @@ public class GameArena
     private Map<Rectangle, javafx.scene.shape.Rectangle> rectangles = new HashMap<>();
     private Map<Line, javafx.scene.shape.Line> lines = new HashMap<>();
     private Map<Text, javafx.scene.text.Text> texts = new HashMap<>();
-    private int objectCount;
 
     // Basic button state
 	private boolean up = false;
@@ -88,7 +89,6 @@ public class GameArena
 	{   
         this.arenaWidth = width;
         this.arenaHeight = height;
-        this.objectCount = 0;
         this.initialised = false;
         this.rendered = false;
 
@@ -194,7 +194,6 @@ public class GameArena
             balls.clear();
             lines.clear();
             texts.clear();
-            objectCount = 0;
             initialised = false;
 
             root.getChildren().clear();
@@ -333,6 +332,7 @@ public class GameArena
 
             text.setX(t.getXPosition());
             text.setY(t.getYPosition());
+            text.setText(t.getText());
             text.setFont(javafx.scene.text.Font.font ("Verdana",t.getSize()));
             text.setFill(getColourFromString(t.getColour()));
         }
@@ -349,6 +349,17 @@ public class GameArena
 		Color colour = Color.web(col);
 		return colour;
 	}
+
+    /**
+     * Sums the sizes of all internal object maps to produce a count of all currently rendered objects
+     *
+     * <b>Note: </b> This will be accurate between update()s, as it accounts for any on the add queue
+     *
+     * @return The number of objects ready to render
+     */
+	public int getObjectCount() {
+	    return balls.size() + texts.size() + rectangles.size() + lines.size() + addList.size();
+    }
 	
 	/**
 	 * Adds a given Ball to the GameArena. 
@@ -360,22 +371,21 @@ public class GameArena
 	{
 		synchronized (this)
 		{
-			if (objectCount > MAXIMUM_OBJECTS)
-			{
-				System.out.println("\n\n");
-				System.out.println(" ********************************************************* ");
-				System.out.println(" ***** Only 100000 Objects Supported per Game Arena! ***** ");
-				System.out.println(" ********************************************************* ");
-				System.out.println("\n");
-				System.out.println("-- Joe\n\n");
+			if (getObjectCount() > MAXIMUM_OBJECTS) {
+                System.out.println("\n\n");
+                System.out.println(" ********************************************************* ");
+                System.out.println(" ***** Only 100000 Objects Supported per Game Arena! ***** ");
+                System.out.println(" ********************************************************* ");
+                System.out.println("\n");
+                System.out.println("-- Joe\n\n");
 
                 System.exit(0);
-			}
+            }
 
             // Add this ball to the draw list. Initially, with a null JavaFX entry, which we'll fill in later to avoid cross-thread operations...
             removeList.remove(b);
-            addList.add(b);
-            objectCount++;
+            if( !balls.containsKey(b) )
+                addList.add(b);
 		}
 	}
 
@@ -391,7 +401,6 @@ public class GameArena
 		{
             addList.remove(b);
             removeList.add(b);
-            objectCount--;
 		}
 	}
 
@@ -405,7 +414,7 @@ public class GameArena
 	{
 		synchronized (this)
 		{
-			if (objectCount > MAXIMUM_OBJECTS)
+			if (getObjectCount() > MAXIMUM_OBJECTS)
 			{
 				System.out.println("\n\n");
 				System.out.println(" ********************************************************* ");
@@ -419,8 +428,8 @@ public class GameArena
 
             // Add this ball to the draw list. Initially, with a null JavaFX entry, which we'll fill in later to avoid cross-thread operations...
             removeList.remove(l);
-            addList.add(l);
-            objectCount++;
+			if( !lines.containsKey(l) )
+                addList.add(l);
 		}
 	}
 
@@ -436,7 +445,6 @@ public class GameArena
 		{
             addList.remove(l);
             removeList.add(l);
-            objectCount--;
 		}
 	}
 
@@ -450,7 +458,7 @@ public class GameArena
 	{
 		synchronized (this)
 		{
-			if (objectCount > MAXIMUM_OBJECTS)
+			if (getObjectCount() > MAXIMUM_OBJECTS)
 			{
 				System.out.println("\n\n");
 				System.out.println(" ********************************************************* ");
@@ -464,8 +472,8 @@ public class GameArena
 
             // Add this ball to the draw list. Initially, with a null JavaFX entry, which we'll fill in later to avoid cross-thread operations...
             removeList.remove(t);
-            addList.add(t);
-            objectCount++;
+            if( !texts.containsKey(t) )
+                addList.add(t);
 		}
 	}
 
@@ -481,7 +489,6 @@ public class GameArena
 		{
             addList.remove(t);
             removeList.add(t);
-            objectCount--;
 		}
 	}
 
@@ -495,7 +502,7 @@ public class GameArena
 	{
 		synchronized (this)
 		{
-			if (objectCount > MAXIMUM_OBJECTS)
+			if (getObjectCount() > MAXIMUM_OBJECTS)
 			{
 				System.out.println("\n\n");
 				System.out.println(" ********************************************************* ");
@@ -509,8 +516,8 @@ public class GameArena
 
             // Add this ball to the draw list. Initially, with a null JavaFX entry, which we'll fill in later to avoid cross-thread operations...
             removeList.remove(r);
-            addList.add(r);
-            objectCount++;
+            if( !rectangles.containsKey(r) )
+                addList.add(r);
 		}
 	}
 
@@ -526,7 +533,6 @@ public class GameArena
 		{
             addList.remove(r);
             removeList.add(r);
-            objectCount--;
 		}
 	}
 
