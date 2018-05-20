@@ -8,10 +8,11 @@ import java.awt.MouseInfo;
 
 public class Game implements MouseListener, MouseMotionListener{
 	
+	private GameArena g1;
 	private  Vector<Brick> brickTable= new Vector<Brick>();
 	private  Ballsgame[] ballTable;
-	private GameArena g1;
 	private int ballsRadius = 10;
+	private int ballShootCounter = 0, ballShooterPeriod = 50;
 	private Arrow a1;
     private double arrowStartX = 250, arrowStartY = 475, arrowRadius= 25, arrowInitAngle = -Math.PI/2;
 	private double angle;
@@ -47,14 +48,12 @@ public class Game implements MouseListener, MouseMotionListener{
 
 	public void createBallsgame(){
 	
-	ballTable = new Ballsgame[3];
+	ballTable = new Ballsgame[5];
 			
 		for (int i = 0; i < ballTable.length; i++){			
 		    ballTable[i] = new Ballsgame(250,475,ballsRadius, "YELLOW"); 
 			ballTable[i].addToGameArena(g1);				
 		}
-		
-
 	}
 
 	public void createArrow(){
@@ -88,8 +87,8 @@ public class Game implements MouseListener, MouseMotionListener{
 	public void mouseClicked(MouseEvent e) {
 		//shoot the ball when the space is hit
 		for(int i = 0; i< ballTable.length; i++){
-			ballTable[i].setXSpeed(2 * Math.cos(angle));
-			ballTable[i].setYSpeed(2 * Math.sin(angle));
+			ballTable[i].setXSpeed(5 * Math.cos(angle));
+			ballTable[i].setYSpeed(5 * Math.sin(angle));
 		}
 		
 		a1.removeArrow(g1);
@@ -102,7 +101,9 @@ public class Game implements MouseListener, MouseMotionListener{
 			if(!roundStarted)
 				moveArrow();
 			else{
-				for(int i = 0; i < ballTable.length ; i++){
+				if(ballShootCounter <ballShooterPeriod*ballTable.length-1)
+					ballShootCounter++;
+				for(int i = 0; i < 1+ballShootCounter/ballShooterPeriod ; i++){
 					
 					//check side collision
 					if(ballTable[i].getXPosition() + ballsRadius >= g1.getArenaWidth() || ballTable[i].getXPosition() - ballsRadius <= 0)				
