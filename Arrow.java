@@ -216,4 +216,11 @@ public class Arrow
         line[2].setEnd(xe, ye);
 
     }
+	
+	
+	//method for removing the arrow
+	public void removeArrow(GameArena ga){
+		for(int i = 0; i<line.length;i++)
+			ga.removeLine(line[i]);
+	}
 }
