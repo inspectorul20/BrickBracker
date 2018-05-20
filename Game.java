@@ -1,14 +1,21 @@
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseEvent;
 import java.util.Vector;
+import java.awt.PointerInfo;
+import java.awt.Point;
+import java.awt.MouseInfo;
 
-public class Game implements MouseListener{
+public class Game implements MouseListener, MouseMotionListener{
 	
-	private static Vector<Brick> brickTable= new Vector<Brick>();
-	private static Ballsgame[] ballTable;
-	private static Arrow a1;
-	private static GameArena g1;
-	private static int ballsRadius = 10;
+	private  Vector<Brick> brickTable= new Vector<Brick>();
+	private  Ballsgame[] ballTable;
+	private GameArena g1;
+	private int ballsRadius = 10;
+	private Arrow a1;
+    private double arrowStartX = 250, arrowStartY = 475, arrowRadius= 25, arrowInitAngle = -Math.PI/2;
+	private boolean roundStarted = false;
+	private double mouseX=arrowStartX, mouseY=arrowStartY;
 		
 	public Game(){		
 		g1 = new GameArena(500,500);
@@ -16,6 +23,7 @@ public class Game implements MouseListener{
 	    createBallsgame();
 	    createArrow();
 		g1.getPanel().addMouseListener(this);
+		g1.getPanel().addMouseMotionListener(this);
 		move();
 		
 	}
@@ -27,7 +35,7 @@ public class Game implements MouseListener{
     }
 
 
-	private static void createBricks(){
+	private void createBricks(){
 		brickTable.add(new Brick(25,25,30,g1)); 			
 	   
 		brickTable.add(new Brick(120,60,20,g1)); 			
@@ -43,23 +51,21 @@ public class Game implements MouseListener{
 		}*/
 	}
 
-	public static void createBallsgame(){
+	public void createBallsgame(){
 	
 	ballTable = new Ballsgame[1];
 			
 		for (int i = 0; i < ballTable.length; i++){			
 					ballTable[i] = new Ballsgame(250,485,ballsRadius, "YELLOW"); 								
 	                ballTable[i].addToGameArena(g1);
-		
-	
 		}
-
+		
 
 	}
 
-	public static void createArrow(){
+	public void createArrow(){
 	
-		a1 = new Arrow(250,475, 250, 450,5, "WHITE", g1);
+		a1 = new Arrow(arrowStartX,arrowStartY, arrowStartX, arrowStartY-arrowRadius,5, "WHITE", g1);
 
 	}
 	
@@ -70,13 +76,25 @@ public class Game implements MouseListener{
     }
 
     public void mouseEntered(MouseEvent e) {
+		mouseX = e.getX();
+		mouseY = e.getY();
     }
 
     public void mouseExited(MouseEvent e) {
     }
+	
+	public void mouseMoved(MouseEvent e) {
+		mouseX = e.getX();
+		mouseY = e.getY();
+    }
+
+    public void mouseDragged(MouseEvent e) {
+    }
 
 	public void move(){		
 		while (true){
+			if(!roundStarted)
+				moveArrow();
 			
 			for(int i = 0; i < ballTable.length ; i++){
 				
@@ -150,5 +168,21 @@ public class Game implements MouseListener{
 			}
 			g1.update();	    
 		}
+	}
+	
+	public void moveArrow(){
+		//update the arrow when in the direction of the mouse
+		double angle = -Math.PI/2;
+		if(mouseX>250){
+			angle = Math.atan((arrowStartY-mouseY)/(arrowStartX-mouseX));
+		    if(mouseY>arrowStartY)
+				angle = 0;
+		}
+		else if(mouseX<250){
+			angle = -Math.PI+Math.atan((arrowStartY-mouseY)/(arrowStartX-mouseX));
+			if(mouseY>arrowStartY)
+				angle = -Math.PI;
+		}
+		a1.setEnd(arrowStartX+arrowRadius*Math.cos(angle),arrowStartY+arrowRadius*Math.sin(angle));
 	}
 }
