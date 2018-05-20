@@ -8,9 +8,15 @@ import java.awt.MouseInfo;
 
 public class Game implements MouseListener, MouseMotionListener{
 	
+	private int maxRoundPerGame = 10;
+	private int currentRound = 1;
+	
 	private GameArena g1;
-	private  Vector<Brick> brickTable= new Vector<Brick>();
-	private  Ballsgame[] ballTable;
+	private Vector<Brick> brickTable= new Vector<Brick>();
+	private double bricksHeight = 50;
+	private Vector<Ballsgame> ballTable;
+	private int ballNumber = 5;
+	private int ballOnScreen = ballNumber;
 	private int ballsRadius = 10;
 	private int ballShootCounter = 0, ballShooterPeriod = 50;
 	private Arrow a1;
@@ -18,6 +24,7 @@ public class Game implements MouseListener, MouseMotionListener{
 	private double angle;
 	private boolean roundStarted = false;
 	private double mouseX=arrowStartX, mouseY=arrowStartY;
+	private boolean stopGame=false;
 		
 	public Game(){		
 		g1 = new GameArena(500,500);
@@ -37,22 +44,21 @@ public class Game implements MouseListener, MouseMotionListener{
 	   
 		brickTable.add(new Brick(250,90,10,g1)); 			
 	   
-/*			
+		/*	
 		for (int col = 0; col < 10; col++){			
 				for (int row = 0; row < 3; row++){			
-					brickTable.add(new Brick(25+50*col,25+50*row,30,g1)); 			
-			}
-			
+					brickTable.add(new Brick(25+50*col,-50+50*row,30,g1)); 			
+			}			
 		}*/
 	}
 
 	public void createBallsgame(){
 	
-	ballTable = new Ballsgame[5];
+	ballTable = new Vector<Ballsgame>();
 			
-		for (int i = 0; i < ballTable.length; i++){			
-		    ballTable[i] = new Ballsgame(250,475,ballsRadius, "YELLOW"); 
-			ballTable[i].addToGameArena(g1);				
+		for (int i = 0; i < ballNumber; i++){			
+			ballTable.add(new Ballsgame(250,475,ballsRadius, "YELLOW")); 
+			ballTable.elementAt(i).addToGameArena(g1);				
 		}
 	}
 
@@ -85,93 +91,105 @@ public class Game implements MouseListener, MouseMotionListener{
     }
 
 	public void mouseClicked(MouseEvent e) {
-		//shoot the ball when the space is hit
-		for(int i = 0; i< ballTable.length; i++){
-			ballTable[i].setXSpeed(5 * Math.cos(angle));
-			ballTable[i].setYSpeed(5 * Math.sin(angle));
+		if(!roundStarted){
+			//shoot the ball when the space is hit
+			for(int i = 0; i< ballTable.size(); i++){
+				ballTable.elementAt(i).setXSpeed(5 * Math.cos(angle));
+				ballTable.elementAt(i).setYSpeed(5 * Math.sin(angle));
+			}
+			
+			a1.removeArrow(g1);
+			
+			roundStarted=true;
 		}
-		
-		a1.removeArrow(g1);
-		
-		roundStarted=true;
-    }
+	}
 	
 	public void move(){		
-		while (true){
+		while (!stopGame){
 			if(!roundStarted)
 				moveArrow();
 			else{
-				if(ballShootCounter <ballShooterPeriod*ballTable.length-1)
+				if(ballShootCounter <ballShooterPeriod*ballNumber-1)
 					ballShootCounter++;
-				for(int i = 0; i < 1+ballShootCounter/ballShooterPeriod ; i++){
-					
+				for(int i = 0; i <1+ballShootCounter/ballShooterPeriod; i++){
+					if(!ballTable.elementAt(i).getIsDestroyed()){
 					//check side collision
-					if(ballTable[i].getXPosition() + ballsRadius >= g1.getArenaWidth() || ballTable[i].getXPosition() - ballsRadius <= 0)				
-						ballTable[i].setXSpeed(-ballTable[i].getXSpeed());
-					
-					if(ballTable[i].getYPosition() - ballsRadius <= 0)
-						ballTable[i].setYSpeed(-ballTable[i].getYSpeed());	
-
-					if(ballTable[i].getYPosition() + ballsRadius >= g1.getArenaHeight())
-						ballTable[i].setYSpeed(-ballTable[i].getYSpeed());					
-					
-					//check bricks collision
-					int brickNumber = brickTable.size();
-					for(int j = 0; j < brickNumber; j++){
-						double brickX = brickTable.elementAt(j).getBrickRectangle().getXPosition();
-						double brickY = brickTable.elementAt(j).getBrickRectangle().getYPosition();
-						double brickHalfWidth = brickTable.elementAt(j).getBrickRectangle().getWidth()/2;
-						double brickHalfHeight = brickTable.elementAt(j).getBrickRectangle().getHeight()/2;
+						if(ballTable.elementAt(i).getXPosition() + ballsRadius >= g1.getArenaWidth() || ballTable.elementAt(i).getXPosition() - ballsRadius <= 0)				
+							ballTable.elementAt(i).setXSpeed(-ballTable.elementAt(i).getXSpeed());
 						
-						//left side
-						if (ballTable[i].getXPosition() + ballsRadius >= brickX-brickHalfWidth
-							&& ballTable[i].getXPosition() + ballsRadius < brickX-(brickHalfWidth*2/3)
-							&& ballTable[i].getYPosition() + ballsRadius > brickY-brickHalfHeight
-							&& ballTable[i].getYPosition() - ballsRadius < brickY+brickHalfHeight){
-								System.out.println("Left of #"+j+" ball at "+ballTable[i].getXPosition()+", "+ballTable[i].getYPosition());
-								ballTable[i].setXSpeed(-ballTable[i].getXSpeed());
-								brickTable.elementAt(j).hit();
-							}
+						if(ballTable.elementAt(i).getYPosition() - ballsRadius <= 0)
+							ballTable.elementAt(i).setYSpeed(-ballTable.elementAt(i).getYSpeed());	
 						
-						//bottom side
-						else if (ballTable[i].getYPosition() - ballsRadius <= brickY+brickHalfHeight
-							&& ballTable[i].getYPosition() - ballsRadius > brickY+(brickHalfHeight*2/3)
-							&& ballTable[i].getXPosition() + ballsRadius > brickX-brickHalfWidth
-							&& ballTable[i].getXPosition() - ballsRadius < brickX+brickHalfWidth){
-								System.out.println("Bottom of #"+j+" ball at "+ballTable[i].getXPosition()+", "+ballTable[i].getYPosition());
-								ballTable[i].setYSpeed(-ballTable[i].getYSpeed());	
-								brickTable.elementAt(j).hit();								
+						//check bricks collision
+						int brickNumber = brickTable.size();
+						for(int j = 0; j < brickNumber; j++){
+							double brickX = brickTable.elementAt(j).getBrickRectangle().getXPosition();
+							double brickY = brickTable.elementAt(j).getBrickRectangle().getYPosition();
+							double brickHalfWidth = brickTable.elementAt(j).getBrickRectangle().getWidth()/2;
+							double brickHalfHeight = brickTable.elementAt(j).getBrickRectangle().getHeight()/2;
+							
+							//left side
+							if (ballTable.elementAt(i).getXPosition() + ballsRadius >= brickX-brickHalfWidth
+								&& ballTable.elementAt(i).getXPosition() + ballsRadius < brickX-(brickHalfWidth*2/3)
+								&& ballTable.elementAt(i).getYPosition() + ballsRadius > brickY-brickHalfHeight
+								&& ballTable.elementAt(i).getYPosition() - ballsRadius < brickY+brickHalfHeight){
+									System.out.println("Left of #"+j+" ball at "+ballTable.elementAt(i).getXPosition()+", "+ballTable.elementAt(i).getYPosition());
+									ballTable.elementAt(i).setXSpeed(-ballTable.elementAt(i).getXSpeed());
+									brickTable.elementAt(j).hit();
+								}
+							
+							//bottom side
+							else if (ballTable.elementAt(i).getYPosition() - ballsRadius <= brickY+brickHalfHeight
+								&& ballTable.elementAt(i).getYPosition() - ballsRadius > brickY+(brickHalfHeight*2/3)
+								&& ballTable.elementAt(i).getXPosition() + ballsRadius > brickX-brickHalfWidth
+								&& ballTable.elementAt(i).getXPosition() - ballsRadius < brickX+brickHalfWidth){
+									System.out.println("Bottom of #"+j+" ball at "+ballTable.elementAt(i).getXPosition()+", "+ballTable.elementAt(i).getYPosition());
+									ballTable.elementAt(i).setYSpeed(-ballTable.elementAt(i).getYSpeed());	
+									brickTable.elementAt(j).hit();								
+								}
+							
+							//right side
+							else if (ballTable.elementAt(i).getXPosition() - ballsRadius <= brickX+brickHalfWidth
+								&& ballTable.elementAt(i).getXPosition() - ballsRadius > brickX+(brickHalfWidth*2/3)
+								&& ballTable.elementAt(i).getYPosition() + ballsRadius > brickY-brickHalfHeight
+								&& ballTable.elementAt(i).getYPosition() - ballsRadius < brickY+brickHalfHeight){
+									System.out.println("Right of #"+j+" ball at "+ballTable.elementAt(i).getXPosition()+", "+ballTable.elementAt(i).getYPosition());
+									ballTable.elementAt(i).setXSpeed(-ballTable.elementAt(i).getXSpeed());
+									brickTable.elementAt(j).hit();
+								}
+							
+							//top side
+							else if (ballTable.elementAt(i).getYPosition() + ballsRadius >= brickY-brickHalfHeight
+								&& ballTable.elementAt(i).getYPosition() - ballsRadius < brickY-(brickHalfHeight*2/3)
+								&& ballTable.elementAt(i).getXPosition() + ballsRadius > brickX-brickHalfWidth
+								&& ballTable.elementAt(i).getXPosition() - ballsRadius < brickX+brickHalfWidth){
+									System.out.println("Top of #"+j+" ball at "+ballTable.elementAt(i).getXPosition()+", "+ballTable.elementAt(i).getYPosition());
+									ballTable.elementAt(i).setYSpeed(-ballTable.elementAt(i).getYSpeed());	
+									brickTable.elementAt(j).hit();						
+								}
+							if(brickTable.elementAt(j).getIsDestroyed()){
+										brickTable.removeElementAt(j);
+										j--;
+										brickNumber--;
+										if(brickNumber==0){
+											setGameWon();											
+										}
 							}
-						
-						//right side
-						else if (ballTable[i].getXPosition() - ballsRadius <= brickX+brickHalfWidth
-							&& ballTable[i].getXPosition() - ballsRadius > brickX+(brickHalfWidth*2/3)
-							&& ballTable[i].getYPosition() + ballsRadius > brickY-brickHalfHeight
-							&& ballTable[i].getYPosition() - ballsRadius < brickY+brickHalfHeight){
-								System.out.println("Right of #"+j+" ball at "+ballTable[i].getXPosition()+", "+ballTable[i].getYPosition());
-								ballTable[i].setXSpeed(-ballTable[i].getXSpeed());
-								brickTable.elementAt(j).hit();
-							}
-						
-						//top side
-						else if (ballTable[i].getYPosition() + ballsRadius >= brickY-brickHalfHeight
-							&& ballTable[i].getYPosition() - ballsRadius < brickY-(brickHalfHeight*2/3)
-							&& ballTable[i].getXPosition() + ballsRadius > brickX-brickHalfWidth
-							&& ballTable[i].getXPosition() - ballsRadius < brickX+brickHalfWidth){
-								System.out.println("Top of #"+j+" ball at "+ballTable[i].getXPosition()+", "+ballTable[i].getYPosition());
-								ballTable[i].setYSpeed(-ballTable[i].getYSpeed());	
-								brickTable.elementAt(j).hit();						
-							}
-						if(brickTable.elementAt(j).getIsDestroyed()){
-									brickTable.removeElementAt(j);
-									j--;
-									brickNumber--;
+						}				
+						ballTable.elementAt(i).setXPosition(ballTable.elementAt(i).getXPosition() + ballTable.elementAt(i).getXSpeed());
+						ballTable.elementAt(i).setYPosition(ballTable.elementAt(i).getYPosition() + ballTable.elementAt(i).getYSpeed());
+						if(ballTable.elementAt(i).getYPosition()-ballsRadius > g1.getArenaHeight()){
+							ballTable.elementAt(i).setIsDestroyed(true);
+							ballOnScreen--;
+							if(ballOnScreen==0){
+								if(currentRound<maxRoundPerGame)
+									newRound();
+								else 
+									//if we arrive here we lost
+									setGameOver();
+							}														
 						}
-					}				
-					ballTable[i].setXPosition(ballTable[i].getXPosition() + ballTable[i].getXSpeed());
-					ballTable[i].setYPosition(ballTable[i].getYPosition() + ballTable[i].getYSpeed());
-					
-				
+					}
 				}
 			}
 			g1.update();	    
@@ -183,14 +201,64 @@ public class Game implements MouseListener, MouseMotionListener{
 		angle = -Math.PI/2;
 		if(mouseX>250){
 			angle = Math.atan((arrowStartY-mouseY)/(arrowStartX-mouseX));
-		    if(mouseY>arrowStartY)
-				angle = 0;
+		    if(mouseY>arrowStartY || angle == 0)
+				angle = 0.01;
 		}
 		else if(mouseX<250){
 			angle = -Math.PI+Math.atan((arrowStartY-mouseY)/(arrowStartX-mouseX));
-			if(mouseY>arrowStartY)
-				angle = -Math.PI;
+			if(mouseY>arrowStartY || angle == -Math.PI)
+				angle = -Math.PI+0.01;
 		}
 		a1.setEnd(arrowStartX+arrowRadius*Math.cos(angle),arrowStartY+arrowRadius*Math.sin(angle));
+	}
+	
+	private void newRound(){
+		currentRound++;
+		for(int i=0;i<brickTable.size();i++){
+			brickTable.elementAt(i).setYPosition(brickTable.elementAt(i).getYPosition()+bricksHeight);
+			if((brickTable.elementAt(i).getYPosition() + bricksHeight/2) >= g1.getArenaHeight()){
+				setGameOver();
+				return;
+
+			}
+		}	
+		ballOnScreen=ballNumber;
+		for(int i=0; i<ballNumber;i++){
+			//reset the balls
+			ballTable.elementAt(i).setIsDestroyed(false);
+			ballTable.elementAt(i).setXPosition(arrowStartX);
+			ballTable.elementAt(i).setYPosition(arrowStartY);			
+		}
+		ballShootCounter=0;
+		roundStarted=false;
+		angle = -Math.PI/2;
+		moveArrow();
+		a1.addArrow(g1);
+		
+			
+	}
+	
+	private void setGameOver(){
+		//clear the game arena
+		stopGame=true;
+		ballTable.clear();
+		for(Brick brick : brickTable){
+			brick.removeFromGameArena();
+		}
+		brickTable.clear();
+		g1.addText(new Text("GAME OVER",100,250,50, "RED"));		
+	}
+	
+	private void setGameWon(){
+		//clear the game arena
+		stopGame=true;
+		for(Brick brick : brickTable){
+			brick.removeFromGameArena();
+		}
+		for(Ballsgame ball : ballTable){
+			ball.removeFromGameArena(g1);
+		}
+		brickTable.clear();
+		g1.addText(new Text("YOU WON !",100,250,50, "GREEN"));		
 	}
 }

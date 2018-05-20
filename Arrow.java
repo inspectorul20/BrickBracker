@@ -223,4 +223,9 @@ public class Arrow
 		for(int i = 0; i<line.length;i++)
 			ga.removeLine(line[i]);
 	}
+	
+	public void addArrow(GameArena ga){
+		for(int i = 0; i<line.length;i++)
+			ga.addLine(line[i]);
+	}
 }

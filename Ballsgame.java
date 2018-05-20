@@ -3,7 +3,7 @@ public class Ballsgame{
 	private Ball b1;
 	private double xSpeed = 2;
 	private double ySpeed = -1;
-	
+	private boolean isDestroyed = false;	
 	
 	public Ballsgame(double x, double y, int size, String colour){
 
@@ -14,6 +14,10 @@ public class Ballsgame{
 	
 	public void addToGameArena(GameArena ga){
 		ga.addBall(b1);
+	}
+	
+	public void removeFromGameArena(GameArena ga){
+		ga.removeBall(b1);
 	}
 
 	public void setXPosition(double xPosition){
@@ -48,5 +52,15 @@ public class Ballsgame{
 	public double getYSpeed(){
 		return ySpeed;
 	}
+	
+	public boolean getIsDestroyed(){
+		return isDestroyed;
+	}
 
+	public void setIsDestroyed(boolean value){
+		isDestroyed = value;
+		xSpeed = 0;
+		ySpeed = 0;
+	}
+	
 }

@@ -5,9 +5,11 @@ public class Brick{
 	private Text txt;
 	private boolean isDestroyed = false;
 	private GameArena ga;
+	private double yPosition;
 	
 	public Brick(double x, double y, int number,GameArena gameArena){
 		hitNumbers = number;
+		yPosition = y;
 		r1 = new Rectangle(x,y,50,50,getColour(number));
 		txt = new Text(hitNumbers.toString(),x,y,20, "WHITE");
 		ga = gameArena;
@@ -48,8 +50,8 @@ public class Brick{
 
 	
 	private void addToGameArena(){
-	ga.addRectangle(r1);
-	ga.addText(txt);
+		ga.addRectangle(r1);
+		ga.addText(txt);
 	}
 	
 	public Rectangle getBrickRectangle(){
@@ -67,8 +69,19 @@ public class Brick{
 		}
 	}
 	
-	private void removeFromGameArena(){
+	public void removeFromGameArena(){
 		ga.removeRectangle(r1);
 		ga.removeText(txt);
+	}
+	
+	public double getYPosition()
+	{
+		return yPosition;
+	}
+	
+	public void setYPosition(double value){
+		yPosition=value;
+		r1.setYPosition(value);
+		txt.setYPosition(value);
 	}
 }
