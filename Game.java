@@ -125,27 +125,28 @@ public class Game implements MouseListener, MouseMotionListener{
 						for(int j = 0; j < brickNumber; j++){
 							double brickX = brickTable.elementAt(j).getBrickRectangle().getXPosition();
 							double brickY = brickTable.elementAt(j).getBrickRectangle().getYPosition();
-							double brickHalfWidth = brickTable.elementAt(j).getBrickRectangle().getWidth()/2;
-							double brickHalfHeight = brickTable.elementAt(j).getBrickRectangle().getHeight()/2;
-							
-							//left side
-							if (ballTable.elementAt(i).getXPosition() + ballsRadius >= brickX-brickHalfWidth
-								&& ballTable.elementAt(i).getXPosition() + ballsRadius < brickX-(brickHalfWidth*2/3)
-								&& ballTable.elementAt(i).getYPosition() + ballsRadius > brickY-brickHalfHeight
-								&& ballTable.elementAt(i).getYPosition() - ballsRadius < brickY+brickHalfHeight){
-									System.out.println("Left of #"+j+" ball at "+ballTable.elementAt(i).getXPosition()+", "+ballTable.elementAt(i).getYPosition());
-									ballTable.elementAt(i).setXSpeed(-ballTable.elementAt(i).getXSpeed());
-									brickTable.elementAt(j).hit();
-								}
-							
+							double brickHalfWidth = bricksHeight/2;
+							double brickHalfHeight = bricksHeight/2;
+
 							//bottom side
-							else if (ballTable.elementAt(i).getYPosition() - ballsRadius <= brickY+brickHalfHeight
+							if (ballTable.elementAt(i).getYPosition() - ballsRadius <= brickY+brickHalfHeight
 								&& ballTable.elementAt(i).getYPosition() - ballsRadius > brickY+(brickHalfHeight*2/3)
 								&& ballTable.elementAt(i).getXPosition() + ballsRadius > brickX-brickHalfWidth
 								&& ballTable.elementAt(i).getXPosition() - ballsRadius < brickX+brickHalfWidth){
-									System.out.println("Bottom of #"+j+" ball at "+ballTable.elementAt(i).getXPosition()+", "+ballTable.elementAt(i).getYPosition());
+									//System.out.println("Bottom of #"+j+" ball at "+ballTable.elementAt(i).getXPosition()+", "+ballTable.elementAt(i).getYPosition());
 									ballTable.elementAt(i).setYSpeed(-ballTable.elementAt(i).getYSpeed());	
-									brickTable.elementAt(j).hit();								
+									brickTable.elementAt(j).hit();	
+									ballTable.elementAt(i).setYPosition(brickY+brickHalfHeight+ballsRadius);
+								}
+							//left side
+							else if (ballTable.elementAt(i).getXPosition() + ballsRadius >= brickX-brickHalfWidth
+								&& ballTable.elementAt(i).getXPosition() + ballsRadius < brickX-(brickHalfWidth*2/3)
+								&& ballTable.elementAt(i).getYPosition() + ballsRadius > brickY-brickHalfHeight
+								&& ballTable.elementAt(i).getYPosition() - ballsRadius < brickY+brickHalfHeight){
+									//System.out.println("Left of #"+j+" ball at "+ballTable.elementAt(i).getXPosition()+", "+ballTable.elementAt(i).getYPosition());
+									ballTable.elementAt(i).setXSpeed(-ballTable.elementAt(i).getXSpeed());
+									brickTable.elementAt(j).hit();
+									ballTable.elementAt(i).setXPosition(brickX-brickHalfHeight-ballsRadius);
 								}
 							
 							//right side
@@ -153,9 +154,10 @@ public class Game implements MouseListener, MouseMotionListener{
 								&& ballTable.elementAt(i).getXPosition() - ballsRadius > brickX+(brickHalfWidth*2/3)
 								&& ballTable.elementAt(i).getYPosition() + ballsRadius > brickY-brickHalfHeight
 								&& ballTable.elementAt(i).getYPosition() - ballsRadius < brickY+brickHalfHeight){
-									System.out.println("Right of #"+j+" ball at "+ballTable.elementAt(i).getXPosition()+", "+ballTable.elementAt(i).getYPosition());
+									//System.out.println("Right of #"+j+" ball at "+ballTable.elementAt(i).getXPosition()+", "+ballTable.elementAt(i).getYPosition());
 									ballTable.elementAt(i).setXSpeed(-ballTable.elementAt(i).getXSpeed());
 									brickTable.elementAt(j).hit();
+									ballTable.elementAt(i).setXPosition(brickX+brickHalfHeight+ballsRadius);
 								}
 							
 							//top side
@@ -163,9 +165,10 @@ public class Game implements MouseListener, MouseMotionListener{
 								&& ballTable.elementAt(i).getYPosition() - ballsRadius < brickY-(brickHalfHeight*2/3)
 								&& ballTable.elementAt(i).getXPosition() + ballsRadius > brickX-brickHalfWidth
 								&& ballTable.elementAt(i).getXPosition() - ballsRadius < brickX+brickHalfWidth){
-									System.out.println("Top of #"+j+" ball at "+ballTable.elementAt(i).getXPosition()+", "+ballTable.elementAt(i).getYPosition());
+									//System.out.println("Top of #"+j+" ball at "+ballTable.elementAt(i).getXPosition()+", "+ballTable.elementAt(i).getYPosition());
 									ballTable.elementAt(i).setYSpeed(-ballTable.elementAt(i).getYSpeed());	
-									brickTable.elementAt(j).hit();						
+									brickTable.elementAt(j).hit();
+									ballTable.elementAt(i).setYPosition(brickY-brickHalfHeight-ballsRadius);					
 								}
 							if(brickTable.elementAt(j).getIsDestroyed()){
 										brickTable.removeElementAt(j);
