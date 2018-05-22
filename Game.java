@@ -2,6 +2,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseEvent;
 import java.util.Vector;
+import java.util.Random;
 import java.awt.PointerInfo;
 import java.awt.Point;
 import java.awt.MouseInfo;
@@ -14,6 +15,7 @@ public class Game implements MouseListener, MouseMotionListener{
 	private GameArena g1;
 	private Vector<Brick> brickTable= new Vector<Brick>();
 	private double bricksHeight = 50;
+	private int brickRandChance = 5;//indicate there is 1 change on that value NOT to get a brick
 	private Vector<Ballsgame> ballTable;
 	private int ballNumber = 5;
 	private int ballOnScreen = ballNumber;
@@ -38,18 +40,17 @@ public class Game implements MouseListener, MouseMotionListener{
 	}
 	
 	private void createBricks(){
-		brickTable.add(new Brick(25,25,30,g1)); 			
-	   
-		brickTable.add(new Brick(120,60,20,g1)); 			
-	   
-		brickTable.add(new Brick(250,90,10,g1)); 			
-	   
-		/*	
+		/*brickTable.add(new Brick(25,25,30,g1)); 	
+		brickTable.add(new Brick(120,60,20,g1)); 	
+		brickTable.add(new Brick(250,90,10,g1)); 
+		*/
+		Random rand = new Random();
 		for (int col = 0; col < 10; col++){			
-				for (int row = 0; row < 3; row++){			
-					brickTable.add(new Brick(25+50*col,-50+50*row,30,g1)); 			
+				for (int row = 0; row < 3; row++){	
+				    if(rand.nextInt(brickRandChance)>0)
+						brickTable.add(new Brick(25+50*col,-75+50*row,40-row*10,g1)); 			
 			}			
-		}*/
+		}
 	}
 
 	public void createBallsgame(){
